@@ -35,13 +35,39 @@ export default {
             })
     },
     methods: {
-        editPost(id) {
-            
-        },
-        updatePost(event) {
-            
+    editPost(id) {
+        // Show edit form and fill in existing post data
+        const post = this.posts.find(p => p.id === id);
+        if (post) {
+            this.entry = post.entry;
+            this.mood = post.mood;
+            this.editPostId = id;
+            this.showEditPost = true;
         }
+    },
+    
+    updatePost(event) {
+        event.preventDefault(); // prevent form reload
+        axios.post(`${this.baseUrl}/updatePost?id=${this.editPostId}`, {
+            entry: this.entry,
+            mood: this.mood
+        })
+        .then(response => {
+            console.log(response.data.message);
+            this.showEditPost = false;
+
+            // Update local post list instantly
+            const updatedPost = this.posts.find(p => p.id === this.editPostId);
+            if (updatedPost) {
+                updatedPost.entry = this.entry;
+                updatedPost.mood = this.mood;
+            }
+        })
+        .catch(error => {
+            console.error('Error updating post:', error);
+        });
     }
+}
 }
 </script>
 
@@ -61,7 +87,7 @@ export default {
                     <td>{{ post.id }}</td>
                     <td>{{ post.entry }}</td>
                     <td>{{ post.mood }}</td>
-                    <td><button>Edit</button></td>
+                    <td><button @click="editPost(post.id)">Edit</button></td>
                 </tr>
             </tbody>
 
@@ -70,7 +96,7 @@ export default {
         <div id="editPost" v-if="showEditPost">
             <h3>Edit Post</h3>
             <div id="postContent" class="mx-3">
-                <form>
+                <form @submit.prevent="updatePost">
                     <div class="mb-3">
                         <label for="entry" class="form-label">Entry</label>
                         <textarea id="entry" class="form-control" v-model="entry" required></textarea>

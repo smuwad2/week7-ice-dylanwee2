@@ -1,44 +1,40 @@
 <script>
-import axios from 'axios';
-
     export default { 
+        data(){
+            return {
+                moods : ['Happy', 'Sad', 'Angry'],
+                selMood : '',
+                subject: '',
+                entry: ""
+            }
+        },
 
        // add code here
-       data () {
-        return {
-            moods: ['Happy', 'Sad', 'Angry'],
-            selectedMood: 'Happy',
-            subject: '',
-            entry: '',
-        }
-       }, 
-       computed: {
+        computed: {
         baseUrl() {
             if (window.location.hostname=='localhost')
                 return 'http://localhost:3000' 
             else {
                 const codespace_host = window.location.hostname.replace('5173', '3000')
-                return https://${codespace_host};
-                }
+                return `https://${codespace_host}`;
             }
+        }
         },
-        methods: {
-            addPost() {
-                axios.get(${this.baseUrl}/addPost, {
+        methods:{
+            addPost(){
+                axios.get(`${this.baseUrl}/addPost`, {
                     params: {
-                        'subject': this.subject,
-                        'entry': this.entry,
-                        'mood': this.selectedMood,
-                    }
-                }).then(response=> {
-                    this.posts = response.data
-                }).catch(error=> {
-                    this.posts = [{ entry: 'There was an error: ' + error.message }]
+                        'subject' : this.subject,
+                        'entry' : this.entry,
+                        'mood' : this.selMood
+                }
+                }).then( response => {
+                    this.outputMsg = response.data.message
+                }).catch(error => {
+                    console.log(error)
                 })
             }
-
         }
-
     }
 </script>
 
@@ -55,15 +51,18 @@ import axios from 'axios';
 
         Mood:
         <!-- TODO: Build a dropdown list here for selecting the mood -->
-        <select v-model="selectedMood">
-            <option v-for="mood in moods">{{ mood }}</option>
+        <select v-model="selMood">
+            <option v-for="mood in moods">
+                {{  mood  }}
+            </option>
         </select>
-
+            
         <br>
 
         <br>
-        <button @click="addPost()">Submit New Post</button>
+        <button @click="addPost">Submit New Post</button>
 
+        {{ outputMsg }}
         <hr> Click  <a><router-link to="/ViewPosts/">here</router-link></a>  to return to Main Page
        
     </div>
